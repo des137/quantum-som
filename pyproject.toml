@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qsom"
-version = "0.2.0"
+version = "0.3.0"
 description = "Quantum Self-Organizing Maps using Classical Shadows"
 readme = "README.md"
 license = {text = "MIT"}
@@ -73,6 +73,7 @@ docs = [
     "sphinx-rtd-theme>=1.0.0",
     "sphinx-autodoc-typehints>=1.20.0",
     "myst-parser>=2.0.0",
+    "sphinx-autobuild>=2021.0.0",
 ]
 all = [
     "qsom[ibm,ml,viz,dev,docs]",

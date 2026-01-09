@@ -1,0 +1,314 @@
+Metadata-Version: 2.4
+Name: qsom
+Version: 0.3.0
+Summary: Quantum Self-Organizing Maps using Classical Shadows
+Author-email: Amol Deshmukh <amol.deshmukh@example.com>
+Maintainer-email: Amol Deshmukh <amol.deshmukh@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/amoldeshmukh/quantum-som
+Project-URL: Documentation, https://quantum-som.readthedocs.io
+Project-URL: Repository, https://github.com/amoldeshmukh/quantum-som
+Project-URL: Issues, https://github.com/amoldeshmukh/quantum-som/issues
+Keywords: quantum computing,machine learning,self-organizing maps,classical shadows,qiskit,quantum machine learning
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Scientific/Engineering :: Physics
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: scipy>=1.7.0
+Requires-Dist: matplotlib>=3.4.0
+Requires-Dist: qiskit>=1.0.0
+Requires-Dist: qiskit-aer>=0.14.0
+Provides-Extra: ibm
+Requires-Dist: qiskit-ibm-runtime>=0.20.0; extra == "ibm"
+Provides-Extra: ml
+Requires-Dist: scikit-learn>=1.0.0; extra == "ml"
+Provides-Extra: viz
+Requires-Dist: plotly>=5.0.0; extra == "viz"
+Provides-Extra: gpu
+Requires-Dist: jax>=0.4.0; extra == "gpu"
+Requires-Dist: jaxlib>=0.4.0; extra == "gpu"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: pytest-xdist>=3.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: pre-commit>=3.0.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=6.0.0; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=1.0.0; extra == "docs"
+Requires-Dist: sphinx-autodoc-typehints>=1.20.0; extra == "docs"
+Requires-Dist: myst-parser>=2.0.0; extra == "docs"
+Requires-Dist: sphinx-autobuild>=2021.0.0; extra == "docs"
+Provides-Extra: all
+Requires-Dist: qsom[dev,docs,ibm,ml,viz]; extra == "all"
+Dynamic: license-file
+
+# Quantum Self-Organizing Maps (QSOM)
+
+[![CI](https://github.com/amoldeshmukh/quantum-som/workflows/CI/badge.svg)](https://github.com/amoldeshmukh/quantum-som/actions)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A Python library for exploring quantum state spaces using classical shadows and self-organizing maps.
+
+## Overview
+
+QSOM combines two powerful techniques:
+
+- **Classical Shadows**: Efficient representation of quantum states using randomized Pauli measurements (Huang et al., 2020)
+- **Self-Organizing Maps (SOM)**: Unsupervised neural network for dimensionality reduction and visualization (Kohonen, 1982)
+
+Together, they enable exploration and visualization of high-dimensional quantum state spaces on both classical simulators and real quantum hardware.
+
+## Features
+
+- **Classical Shadows**
+  - Random Pauli measurement basis selection
+  - Proper inverse channel reconstruction
+  - Observable estimation from shadows
+  - Batch processing for efficiency
+
+- **Quantum SOM**
+  - Multiple distance metrics (Euclidean, fidelity, Bures, trace, quantum)
+  - Adaptive learning rate scheduling
+  - Mini-batch training for large datasets
+  - Model checkpointing and resumption
+
+- **Visualization**
+  - U-matrix and hit map visualization
+  - Interactive Plotly visualizations
+  - 3D surface plots
+  - Training animations
+
+- **Quantum Backend**
+  - Qiskit 2.0+ integration
+  - Local simulator support (Aer)
+  - IBM Quantum hardware support
+  - Error mitigation options
+
+## Installation
+
+### From PyPI (coming soon)
+
+```bash
+pip install qsom
+```
+
+### From source
+
+```bash
+git clone https://github.com/amoldeshmukh/quantum-som.git
+cd quantum-som
+pip install -e ".[dev]"
+```
+
+### Optional dependencies
+
+```bash
+# For IBM Quantum hardware
+pip install qsom[ibm]
+
+# For interactive visualizations
+pip install qsom[viz]
+
+# For GPU acceleration (experimental)
+pip install qsom[gpu]
+
+# All extras
+pip install qsom[all]
+```
+
+## Quick Start
+
+```python
+from qsom import QuantumBackend, ClassicalShadow, QuantumSOM, generate_quantum_states
+from qiskit import QuantumCircuit
+import numpy as np
+
+# 1. Generate quantum states
+n_qubits = 3
+states = generate_quantum_states(100, n_qubits, state_type='random')
+
+# 2. Initialize backend and shadow generator
+backend = QuantumBackend(use_simulator=True)
+shadow_gen = ClassicalShadow(n_qubits=n_qubits, backend=backend, shadow_size=50)
+
+# 3. Generate shadow features
+circuits = []
+for state in states:
+    qc = QuantumCircuit(n_qubits)
+    qc.prepare_state(state, range(n_qubits))
+    circuits.append(qc)
+
+features = shadow_gen.generate_features_batch(circuits)
+
+# 4. Train SOM
+som = QuantumSOM(
+    grid_size=(10, 10),
+    input_dim=features.shape[1],
+    distance_metric='quantum',
+    n_iterations=1000
+)
+som.train(features, verbose=True)
+
+# 5. Visualize
+fig = som.visualize(data=features, title="Quantum State Space")
+```
+
+## Advanced Usage
+
+### Mini-Batch Training
+
+For large datasets, use mini-batch training:
+
+```python
+som.train_minibatch(
+    features,
+    n_epochs=20,
+    batch_size=32,
+    checkpoint_dir='checkpoints',
+    checkpoint_freq=5
+)
+```
+
+### Checkpointing
+
+Save and load trained models:
+
+```python
+# Save
+som.save_checkpoint('my_model')
+
+# Load
+loaded_som = QuantumSOM.load_checkpoint('my_model')
+```
+
+### Interactive Visualization
+
+Create interactive Plotly visualizations:
+
+```python
+from qsom import create_interactive_umatrix, create_3d_umatrix
+
+# Interactive U-matrix
+fig = create_interactive_umatrix(som, data=features, labels=labels)
+fig.show()
+
+# 3D surface plot
+fig_3d = create_3d_umatrix(som)
+fig_3d.show()
+```
+
+### Classical Data Encoding
+
+Encode classical data as quantum states:
+
+```python
+from qsom import angle_encoding
+from sklearn.datasets import load_iris
+
+iris = load_iris()
+quantum_states = angle_encoding(iris.data)
+```
+
+## Examples
+
+See the `examples/` directory for complete examples:
+
+- `iris_qsom.py`: QSOM on the Iris dataset
+- `breast_cancer_qsom.py`: 10-qubit classification
+- `heisenberg_qsom.py`: Quantum physics application
+
+See `notebooks/tutorial.ipynb` for an interactive tutorial.
+
+## API Reference
+
+### QuantumBackend
+
+```python
+QuantumBackend(
+    backend_name: str = None,      # IBM Quantum backend name
+    service: QiskitRuntimeService = None,
+    use_simulator: bool = False,   # Use local Aer simulator
+    resilience_level: int = 1,     # Error mitigation level
+    dynamical_decoupling: bool = False,
+    shots: int = 1000
+)
+```
+
+### ClassicalShadow
+
+```python
+ClassicalShadow(
+    n_qubits: int,
+    backend: QuantumBackend = None,
+    n_shots: int = 1000,
+    shadow_size: int = 100,        # Number of random measurements
+    shadow_type: str = 'pauli',    # 'pauli' or 'clifford'
+    use_inverse_channel: bool = True
+)
+```
+
+### QuantumSOM
+
+```python
+QuantumSOM(
+    grid_size: tuple = (10, 10),
+    input_dim: int = None,
+    learning_rate: float = 0.5,
+    sigma: float = 1.0,            # Neighborhood radius
+    n_iterations: int = 1000,
+    distance_metric: str = 'euclidean',  # 'euclidean', 'fidelity', 'quantum', 'bures', 'trace'
+    random_seed: int = None
+)
+```
+
+## Performance Tips
+
+- **Shadow Size**: More measurements = better accuracy but slower. Start with 50-100.
+- **Grid Size**: Larger grids = finer resolution. Match to your data complexity.
+- **Distance Metric**: `'euclidean'` is fastest; `'quantum'` balances speed and accuracy.
+- **Batch Processing**: Use `generate_features_batch()` for multiple circuits.
+- **Mini-Batch Training**: Essential for datasets > 1000 samples.
+
+## Testing
+
+```bash
+# Run tests
+pytest tests/ -v
+
+# With coverage
+pytest tests/ --cov=src/qsom --cov-report=html
+```
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## References
+
+- Huang, H.-Y., Kueng, R., & Preskill, J. (2020). Predicting many properties of a quantum system from very few measurements. *Nature Physics*.
+- Kohonen, T. (1982). Self-organized formation of topologically correct feature maps. *Biological Cybernetics*.
+- Nielsen, M. A., & Chuang, I. L. (2010). *Quantum Computation and Quantum Information*.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Author
+
+Amol Deshmukh
