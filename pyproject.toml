@@ -1,0 +1,210 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qsom"
+version = "0.2.0"
+description = "Quantum Self-Organizing Maps using Classical Shadows"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Amol Deshmukh", email = "amol.deshmukh@example.com"}
+]
+maintainers = [
+    {name = "Amol Deshmukh", email = "amol.deshmukh@example.com"}
+]
+keywords = [
+    "quantum computing",
+    "machine learning",
+    "self-organizing maps",
+    "classical shadows",
+    "qiskit",
+    "quantum machine learning"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "matplotlib>=3.4.0",
+    "qiskit>=1.0.0",
+    "qiskit-aer>=0.14.0",
+]
+
+[project.optional-dependencies]
+ibm = [
+    "qiskit-ibm-runtime>=0.20.0",
+]
+ml = [
+    "scikit-learn>=1.0.0",
+]
+viz = [
+    "plotly>=5.0.0",
+]
+gpu = [
+    "jax>=0.4.0",
+    "jaxlib>=0.4.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.20.0",
+    "myst-parser>=2.0.0",
+]
+all = [
+    "qsom[ibm,ml,viz,dev,docs]",
+]
+
+[project.urls]
+Homepage = "https://github.com/amoldeshmukh/quantum-som"
+Documentation = "https://quantum-som.readthedocs.io"
+Repository = "https://github.com/amoldeshmukh/quantum-som"
+Issues = "https://github.com/amoldeshmukh/quantum-som/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+qsom = ["py.typed"]
+
+# Pytest configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "hardware: marks tests requiring quantum hardware",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:qiskit_aer.*",
+    "ignore::DeprecationWarning:stevedore.*",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src/qsom"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+ignore_missing_imports = true
+show_error_codes = true
+pretty = true
+files = ["src/qsom"]
+
+[[tool.mypy.overrides]]
+module = [
+    "qiskit.*",
+    "qiskit_aer.*",
+    "qiskit_ibm_runtime.*",
+    "scipy.*",
+    "matplotlib.*",
+    "sklearn.*",
+]
+ignore_missing_imports = true
+
+# Ruff configuration (fast Python linter)
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "C901",   # too complex
+    "ARG001", # unused function argument
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["qsom"]
+
+# Black configuration
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+    | \.mypy_cache
+    | \.venv
+    | build
+    | dist
+)/
+'''
+
+# isort configuration
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["qsom"]
+skip_gitignore = true
